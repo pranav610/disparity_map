@@ -58,7 +58,7 @@ void Callback(ros::NodeHandle &node_handle, const sensor_msgs::Image::ConstPtr &
     Ptr<StereoSGBM> sgbm = StereoSGBM::create();
 
     sgbm->setMinDisparity(0);
-    sgbm->setPreFilterCap(63);
+    sgbm->setPreFilterCap(31);
     sgbm->setP1(8 * (2 * blockSize + 1) * (2 * blockSize + 1));
     sgbm->setP2(32 * (2 * blockSize + 1) * (2 * blockSize + 1));
     sgbm->setBlockSize((2 * blockSize + 1));
