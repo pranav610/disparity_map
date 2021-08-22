@@ -23,7 +23,7 @@ int uniquenessRatio;
 int speckleWindowSize;
 int speckleRange;
 
-void Callback(const sensor_msgs::Image::ConstPtr &msg1, const sensor_msgs::Image::ConstPtr &msg2, ros::NodeHandle &node_handle)
+void Callback(ros::NodeHandle &node_handle, const sensor_msgs::Image::ConstPtr &msg1, const sensor_msgs::Image::ConstPtr &msg2)
 {
     cv_bridge::CvImagePtr cv_ptr1;
     cv_bridge::CvImagePtr cv_ptr2;
@@ -33,8 +33,8 @@ void Callback(const sensor_msgs::Image::ConstPtr &msg1, const sensor_msgs::Image
     namedWindow("right", WINDOW_AUTOSIZE);
     namedWindow("disp", WINDOW_AUTOSIZE);
 
-    cv_ptr1 = cv_bridge::toCvCopy(msg1);
-    cv_ptr2 = cv_bridge::toCvCopy(msg2);
+    cv_ptr1 = cv_bridge::toCvCopy(msg1,sensor_msgs::image_encodings::BGR8);
+    cv_ptr2 = cv_bridge::toCvCopy(msg2,sensor_msgs::image_encodings::BGR8);
 
     img1 = cv_ptr1->image;
     img2 = cv_ptr2->image;
@@ -55,7 +55,7 @@ void Callback(const sensor_msgs::Image::ConstPtr &msg1, const sensor_msgs::Image
         ROS_INFO("Parameters Loaded.");
     }
 
-    Ptr<StereoSGBM> sgbm = StereoSGBM::create;
+    Ptr<StereoSGBM> sgbm = StereoSGBM::create();
 
     sgbm->setMinDisparity(0);
     sgbm->setPreFilterCap(63);
@@ -75,7 +75,7 @@ void Callback(const sensor_msgs::Image::ConstPtr &msg1, const sensor_msgs::Image
     imshow("right", img2);
     imshow("disp", disp8);
 
-    waitKey(200);
+    waitKey(5000);
     destroyAllWindows();
 }
 
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
     message_filters::Subscriber<sensor_msgs::Image> input2(nh_stereo_match, "/narrow_stereo_textured/right/image_raw", 10);
     TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image> sync(input1, input2, 10);
     ROS_INFO("Going into callback..");
-    sync.registerCallback(boost::bind(&Callback, _1, _2, boost::ref(nh_stereo_match)));
+    sync.registerCallback(boost::bind(&Callback,boost::ref(nh_stereo_match), _1, _2));
 
     ros::spin();
     return 0;
