@@ -1,0 +1,6 @@
+numDisparities: 12 #16k
+SADWindowSize : 2 #2k+1
+uniquenessRatio : 5 #between 5-15 is good
+speckleWindowSize : 150 #50-200 range, 0 to disable
+speckleRange : 2 #1-2 good, auto multiplication by 16
+disp12MaxDiff : 10 #tunable
