@@ -25,32 +25,29 @@ int speckleRange;
 int mindisaprity;
 int prefilterCap;
 
+int counter = 0;
+image_transport::Publisher pub;
+
 void Callback(ros::NodeHandle &node_handle, const sensor_msgs::Image::ConstPtr &msg1, const sensor_msgs::Image::ConstPtr &msg2)
 {
     cv_bridge::CvImagePtr cv_ptr1;
     cv_bridge::CvImagePtr cv_ptr2;
     Mat img1, img2, g1, g2;
     Mat disp, disp8;
-    namedWindow("left",WINDOW_NORMAL);
-    namedWindow("right",WINDOW_NORMAL) ;
-    namedWindow("disp",WINDOW_NORMAL );
+    namedWindow("left", WINDOW_NORMAL);
+    namedWindow("right", WINDOW_NORMAL);
+    namedWindow("disp", WINDOW_NORMAL);
 
-    cv_ptr1 = cv_bridge::toCvCopy(msg1,sensor_msgs::image_encodings::BGR8);
-    cv_ptr2 = cv_bridge::toCvCopy(msg2,sensor_msgs::image_encodings::BGR8);
+    cv_ptr1 = cv_bridge::toCvCopy(msg1, sensor_msgs::image_encodings::BGR8);
+    cv_ptr2 = cv_bridge::toCvCopy(msg2, sensor_msgs::image_encodings::BGR8);
 
     img1 = cv_ptr1->image;
     img2 = cv_ptr2->image;
 
-    // img1 = imread("~/Downloads/left.png");
-    // img2 = imread("~/Downloads/right.png"); 
-
     cvtColor(img1, g1, COLOR_BGR2GRAY);
     cvtColor(img2, g2, COLOR_BGR2GRAY);
 
-    // pyrDown(g1, g1, Size( img1.cols/2, img1.rows/2 ));
-    // pyrDown(g2, g2, Size( img2.cols/2, img2.rows/2 ));
-
-    bool param_success = true; 
+    bool param_success = true;
 
     param_success &= node_handle.getParam("numDisparities", numDisparities);
     param_success &= node_handle.getParam("SADWindowSize", blockSize);
@@ -60,8 +57,9 @@ void Callback(ros::NodeHandle &node_handle, const sensor_msgs::Image::ConstPtr &
     param_success &= node_handle.getParam("disp12MaxDiff", disp12MaxDiff);
     param_success &= node_handle.getParam("mindisaprity", mindisaprity);
     param_success &= node_handle.getParam("prefilterCap", prefilterCap);
-    
-    if(param_success){
+
+    if (param_success)
+    {
         ROS_INFO("Parameters Loaded.");
     }
 
@@ -85,19 +83,34 @@ void Callback(ros::NodeHandle &node_handle, const sensor_msgs::Image::ConstPtr &
     imshow("right", img2);
     imshow("disp", disp8);
 
-    waitKey(100);
-    
+    // if(count%1000 = 0){
+    //     imwrite("~/Downloads/imgRawLeft"+std::to_string(counter)+".png",img1);
+    //     imwrite("~/Downloads/imgRawRight"+std::to_string(counter)+".png",img2);
+    //     imwrite("~/Downloads/disparity"+std::to_string(counter)+".png",disp8);
+    // }
+    counter++;
+
+    cv_bridge::CvImage out_msg;
+    out_msg.header = msg1->header;                          // Same timestamp and tf frame as input image
+    out_msg.encoding = sensor_msgs::image_encodings::MONO8; // Or whatever
+    out_msg.image = disp8;                                  // Your cv::Mat
+
+    pub.publish(out_msg.toImageMsg());
+
+    waitKey(10);
 }
 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "stereo_matcher");
     ros::NodeHandle nh_stereo_match;
+    image_transport::ImageTransport it(nh_stereo_match);
+    pub = it.advertise("/disparityimage", 1);
     message_filters::Subscriber<sensor_msgs::Image> input1(nh_stereo_match, "/cam0/image_raw", 1);
     message_filters::Subscriber<sensor_msgs::Image> input2(nh_stereo_match, "/cam1/image_raw", 1);
     TimeSynchronizer<sensor_msgs::Image, sensor_msgs::Image> sync(input1, input2, 1);
     ROS_INFO("Going into callback..");
-    sync.registerCallback(boost::bind(&Callback,boost::ref(nh_stereo_match), _1, _2));
+    sync.registerCallback(boost::bind(&Callback, boost::ref(nh_stereo_match), _1, _2));
 
     ros::spin();
     destroyAllWindows();

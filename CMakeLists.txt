@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   message_filters
+  image_transport
 )
 
 if(cv_bridge_VERSION VERSION_GREATER "1.12.0")
