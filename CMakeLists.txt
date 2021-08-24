@@ -219,3 +219,9 @@ include_directories(${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 # catkin_add_nosetests(test)
 add_executable(stereo_matcher src/stereo_matcher.cpp)
 target_link_libraries (stereo_matcher ${catkin_LIBRARIES})
+
+add_executable(imgwriter src/imgwriter.cpp)
+target_link_libraries (imgwriter ${catkin_LIBRARIES})
+
+add_executable(static_matcher src/static_matcher.cpp)
+target_link_libraries (static_matcher ${catkin_LIBRARIES})

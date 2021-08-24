@@ -1,6 +1,10 @@
-numDisparities: 12 #16k
-SADWindowSize : 7 #2k+1
-uniquenessRatio : 15 #between 5-15 is good
-speckleWindowSize : 100 #50-200 range, 0 to disable
+numDisparities: 8 #16k
+SADWindowSize : 1 #2k+1
+uniquenessRatio : 3 #between 5-15 is good
+speckleWindowSize : 150 #50-200 range, 0 to disable
 speckleRange : 2 #1-2 good, auto multiplication by 16
-disp12MaxDiff : 40 #tunable
+disp12MaxDiff : 50 #tunable
+mindisaprity : 5 #can be greater than 0
+prefilterCap : 31 #31 or 4
+name1 : "/home/pranav/Downloads/sample_stereo_imgs/img1_300.png" 
+name2 : "/home/pranav/Downloads/sample_stereo_imgs/img2_300.png"
