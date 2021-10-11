@@ -6,5 +6,5 @@ speckleRange : 2 #1-2 good, auto multiplication by 16
 disp12MaxDiff : 50 #tunable
 mindisaprity : 5 #can be greater than 0
 prefilterCap : 31 #31 or 4
-name1 : "/home/pranav/Downloads/sample_stereo_imgs/img1_300.png" 
-name2 : "/home/pranav/Downloads/sample_stereo_imgs/img2_300.png"
+name1 : "/home/pranav/Downloads/data_scene_flow/testing/image_2/000000_10.png"
+name2 : "/home/pranav/Downloads/data_scene_flow/testing/image_2/000000_11.png"

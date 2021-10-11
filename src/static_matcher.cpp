@@ -15,10 +15,8 @@
 using namespace cv;
 using namespace std;
 
-
-
 int main(int argc, char **argv)
-{   
+{
     ros::init(argc, argv, "static_matcher");
     ros::NodeHandle nh_static;
 
@@ -35,13 +33,16 @@ int main(int argc, char **argv)
 
     Mat img1, img2, disp;
     Ptr<StereoSGBM> sgbm = StereoSGBM::create();
-    namedWindow("MyWindow", WINDOW_NORMAL);
+    namedWindow("left", WINDOW_NORMAL);
+    namedWindow("right", WINDOW_NORMAL);
+    namedWindow("dispshow", WINDOW_NORMAL);
 
-    cout<<"Images Loaded\n";
-
-    ros::Rate loop_rate(10);
-    while(ros::ok()){
-        bool param_success = true; 
+    cout << "Images Loaded\n";
+    int number = 0;
+    ros::Rate loop_rate(100);
+    while (ros::ok() && number<200)
+    {
+        bool param_success = true;
 
         param_success &= nh_static.getParam("numDisparities", numDisparities);
         param_success &= nh_static.getParam("SADWindowSize", blockSize);
@@ -51,16 +52,26 @@ int main(int argc, char **argv)
         param_success &= nh_static.getParam("disp12MaxDiff", disp12MaxDiff);
         param_success &= nh_static.getParam("mindisaprity", mindisaprity);
         param_success &= nh_static.getParam("prefilterCap", prefilterCap);
-        param_success &= nh_static.getParam("name1", name1);
-        param_success &= nh_static.getParam("name2", name2);
+        // param_success &= nh_static.getParam("name1", name1);
+        // param_success &= nh_static.getParam("name2", name2);
 
-        if(param_success){
+        if (param_success)
+        {
             ROS_INFO("Parameters Loaded.");
         }
-        img1 = imread(name1,1);
-        img2 = imread(name2,1);
+        ///home/pranav/Downloads/data_scene_flow/testing/image_2/000000_10.png
+        string seq = "000000";
+        int temp = number;
+        for (int i = 5; i >= 0; i--)
+        {
+            seq[i] += temp % 10;
+            temp = temp / 10;
+        }
 
-        cout<<"Images Loaded."<<name1<<endl;
+        img1 = imread("/home/pranav/Downloads/data_scene_flow/testing/image_2/" + seq + "_10.png", 1);
+        img2 = imread("/home/pranav/Downloads/data_scene_flow/testing/image_2/" + seq + "_11.png", 1);
+
+        cout << "Images Loaded." << name1 << endl;
 
         sgbm->setMinDisparity(mindisaprity);
         sgbm->setPreFilterCap(prefilterCap);
@@ -76,10 +87,15 @@ int main(int argc, char **argv)
 
         normalize(disp, disp, 0, 255, CV_MINMAX, CV_8U);
 
-        imshow("MyWindow", disp);
-        waitKey(10);
+        imshow("left", img1);
+        imshow("right", img2);
+        imshow("dispshow", disp);
+
+        imwrite("/home/pranav/Downloads/sample/disparity" + std::to_string(number) + ".png", disp);
+        number++;
+        waitKey(100);
     }
-    
+
     loop_rate.sleep();
 
     destroyAllWindows();

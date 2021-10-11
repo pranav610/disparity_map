@@ -83,12 +83,12 @@ void Callback(ros::NodeHandle &node_handle, const sensor_msgs::Image::ConstPtr &
     imshow("right", img2);
     imshow("disp", disp8);
 
-    // if(count%1000 = 0){
-    //     imwrite("~/Downloads/imgRawLeft"+std::to_string(counter)+".png",img1);
-    //     imwrite("~/Downloads/imgRawRight"+std::to_string(counter)+".png",img2);
-    //     imwrite("~/Downloads/disparity"+std::to_string(counter)+".png",disp8);
+    // if((counter<=80) || (counter>=600 && counter<=700) || (counter>=800 && counter<=820)){
+    //     imwrite("/home/pranav/Downloads/Sample/imgRawLeft"+std::to_string(counter)+".png",img1);
+    //     imwrite("/home/pranav/Downloads/Sample/imgRawRight"+std::to_string(counter)+".png",img2);
+    //     imwrite("/home/pranav/Downloads/Sample/disparity"+std::to_string(counter)+".png",disp8);
     // }
-    counter++;
+    // counter++;
 
     cv_bridge::CvImage out_msg;
     out_msg.header = msg1->header;                          // Same timestamp and tf frame as input image
