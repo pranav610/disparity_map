@@ -31,16 +31,19 @@ int main(int argc, char **argv)
     string name1;
     string name2;
 
-    Mat img1, img2, disp;
+    Mat img1, img2, imgtruth, disp, display;
     Ptr<StereoSGBM> sgbm = StereoSGBM::create();
     namedWindow("left", WINDOW_NORMAL);
     namedWindow("right", WINDOW_NORMAL);
     namedWindow("dispshow", WINDOW_NORMAL);
+    namedWindow("truthshow", WINDOW_NORMAL);
+    namedWindow("errorshow", WINDOW_NORMAL);
 
     cout << "Images Loaded\n";
     int number = 0;
-    ros::Rate loop_rate(100);
-    while (ros::ok() && number<200)
+    long error = 0;
+    ros::Rate loop_rate(10);
+    while (ros::ok() && number < 200)
     {
         bool param_success = true;
 
@@ -55,9 +58,9 @@ int main(int argc, char **argv)
         // param_success &= nh_static.getParam("name1", name1);
         // param_success &= nh_static.getParam("name2", name2);
 
-        if (param_success)
+        if (!param_success)
         {
-            ROS_INFO("Parameters Loaded.");
+            ROS_INFO("Parameters not loaded Loaded.");
         }
         ///home/pranav/Downloads/data_scene_flow/testing/image_2/000000_10.png
         string seq = "000000";
@@ -67,11 +70,11 @@ int main(int argc, char **argv)
             seq[i] += temp % 10;
             temp = temp / 10;
         }
+        string tempnew = "000000";
+        img1 = imread("/home/pranav/Downloads/data_scene_flow/training/image_2/" + seq + "_10.png", 0);
+        img2 = imread("/home/pranav/Downloads/data_scene_flow/training/image_2/" + seq + "_11.png", 0);
 
-        img1 = imread("/home/pranav/Downloads/data_scene_flow/testing/image_2/" + seq + "_10.png", 1);
-        img2 = imread("/home/pranav/Downloads/data_scene_flow/testing/image_2/" + seq + "_11.png", 1);
-
-        cout << "Images Loaded." << name1 << endl;
+        //cout << "Images Loaded." << name1 << endl;
 
         sgbm->setMinDisparity(mindisaprity);
         sgbm->setPreFilterCap(prefilterCap);
@@ -87,14 +90,23 @@ int main(int argc, char **argv)
 
         normalize(disp, disp, 0, 255, CV_MINMAX, CV_8U);
 
+        imgtruth = imread("/home/pranav/Downloads/data_scene_flow/training/disp_noc_0/" + seq + "_10.png", 0);
+        display = imread("/home/pranav/Downloads/data_scene_flow/training/disp_noc_0/" + seq + "_10.png", 0);
+        normalize(imgtruth, imgtruth, 0, 255, CV_MINMAX, CV_8U);
+        absdiff(disp, imgtruth, display);
+        cout << "Absolute Diff Working\n";
         imshow("left", img1);
         imshow("right", img2);
         imshow("dispshow", disp);
-
-        imwrite("/home/pranav/Downloads/sample/disparity" + std::to_string(number) + ".png", disp);
+        imshow("truthshow", imgtruth);
+        imshow("errorshow", display);
+        cout << norm(display, NORM_L2, noArray()) << endl;
+        imwrite("/home/pranav/Downloads/sample2/disparity" + std::to_string(number) + ".png", disp);
+        error += norm(display, NORM_L2, noArray()) / 200;
         number++;
-        waitKey(100);
+        waitKey(10);
     }
+    cout << error << endl;
 
     loop_rate.sleep();
 
