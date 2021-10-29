@@ -3,6 +3,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/stereo.hpp>
+#include <opencv2/imgcodecs/imgcodecs.hpp>
+#include <opencv2/ximgproc.hpp>
+#include <opencv2/core/utility.hpp>
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
@@ -14,6 +17,7 @@
 
 using namespace cv;
 using namespace std;
+
 
 int main(int argc, char **argv)
 {
@@ -31,19 +35,19 @@ int main(int argc, char **argv)
     string name1;
     string name2;
 
-    Mat img1, img2, imgtruth, disp, display;
+    Mat img1, img2, imgtruth, disp, display,depth;
     Ptr<StereoSGBM> sgbm = StereoSGBM::create();
     namedWindow("left", WINDOW_NORMAL);
     namedWindow("right", WINDOW_NORMAL);
     namedWindow("dispshow", WINDOW_NORMAL);
-    namedWindow("truthshow", WINDOW_NORMAL);
-    namedWindow("errorshow", WINDOW_NORMAL);
+    //namedWindow("truthshow", WINDOW_NORMAL);
+    //namedWindow("errorshow", WINDOW_NORMAL);
 
     cout << "Images Loaded\n";
     int number = 0;
     long error = 0;
-    ros::Rate loop_rate(10);
-    while (ros::ok() && number < 200)
+    ros::Rate loop_rate(300);
+    while (ros::ok()&&number<200)
     {
         bool param_success = true;
 
@@ -71,14 +75,15 @@ int main(int argc, char **argv)
             temp = temp / 10;
         }
         string tempnew = "000000";
-        img1 = imread("/home/pranav/Downloads/data_scene_flow/training/image_2/" + seq + "_10.png", 0);
-        img2 = imread("/home/pranav/Downloads/data_scene_flow/training/image_2/" + seq + "_11.png", 0);
-
+        img1 = imread("/home/aditya/catkin_ws/src/disparity_map/src/InputImages/" + seq + "_10.png");
+        img2 = imread("/home/aditya/catkin_ws/src/disparity_map/src/InputImages/" + seq + "_11.png");
+        // equalizeHist(img1,img1);
+        // equalizeHist(img2,img2);
         //cout << "Images Loaded." << name1 << endl;
 
         sgbm->setMinDisparity(mindisaprity);
         sgbm->setPreFilterCap(prefilterCap);
-        sgbm->setP1(8 * (2 * blockSize + 1) * (2 * blockSize + 1));
+        sgbm->setP1(4 * (2 * blockSize + 1) * (2 * blockSize + 1));
         sgbm->setP2(32 * (2 * blockSize + 1) * (2 * blockSize + 1));
         sgbm->setBlockSize((2 * blockSize + 1));
         sgbm->setNumDisparities(16 * numDisparities);
@@ -86,27 +91,28 @@ int main(int argc, char **argv)
         sgbm->setSpeckleWindowSize(speckleWindowSize);
         sgbm->setSpeckleRange(speckleRange);
         sgbm->setDisp12MaxDiff(disp12MaxDiff);
+        sgbm->setMode(StereoSGBM::MODE_HH);
         sgbm->compute(img1, img2, disp);
-
-        normalize(disp, disp, 0, 255, CV_MINMAX, CV_8U);
-
-        imgtruth = imread("/home/pranav/Downloads/data_scene_flow/training/disp_noc_0/" + seq + "_10.png", 0);
-        display = imread("/home/pranav/Downloads/data_scene_flow/training/disp_noc_0/" + seq + "_10.png", 0);
-        normalize(imgtruth, imgtruth, 0, 255, CV_MINMAX, CV_8U);
-        absdiff(disp, imgtruth, display);
-        cout << "Absolute Diff Working\n";
+        normalize(disp,disp,0,255,CV_MINMAX,CV_8UC1);
+        //normalize(disp, disp, 0, 255, CV_MINMAX, CV_8UC3);
+        //imgtruth = imread("/home/pranav/Downloads/data_scene_flow/training/disp_noc_0/" + seq + "_10.png", 0);
+        //display = imread("/home/pranav/Downloads/data_scene_flow/training/disp_noc_0/" + seq + "_10.png", 0);
+        //normalize(imgtruth, imgtruth, 0, 255, CV_MINMAX, CV_8U);
+        //absdiff(disp, imgtruth, display);
+        //cout << "Absolute Diff Working\n";
         imshow("left", img1);
         imshow("right", img2);
         imshow("dispshow", disp);
-        imshow("truthshow", imgtruth);
-        imshow("errorshow", display);
-        cout << norm(display, NORM_L2, noArray()) << endl;
-        imwrite("/home/pranav/Downloads/sample2/disparity" + std::to_string(number) + ".png", disp);
-        error += norm(display, NORM_L2, noArray()) / 200;
+        //imshow("truthshow", imgtruth);
+        //imshow("errorshow", display);
+        //cout << norm(display, NORM_L2, noArray()) << endl;
+        //imwrite("/home/pranav/Downloads/sample2/disparity" + std::to_string(number) + ".png", disp);
+        //error += norm(display, NORM_L2, noArray()) / 200;
+        imwrite("/home/aditya/catkin_ws/src/disparity_map/src/output/"+std::to_string(number)+".png",disp);
         number++;
-        waitKey(10);
+        waitKey(300);
     }
-    cout << error << endl;
+    //cout << error << endl;
 
     loop_rate.sleep();
 
