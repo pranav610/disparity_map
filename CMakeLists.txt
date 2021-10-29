@@ -226,3 +226,15 @@ target_link_libraries (imgwriter ${catkin_LIBRARIES})
 
 add_executable(static_matcher src/static_matcher.cpp)
 target_link_libraries (static_matcher ${catkin_LIBRARIES})
+
+add_executable(static_matcher_with_trackbar src/static_matcher_with_trackbar.cpp)
+target_link_libraries (static_matcher_with_trackbar ${catkin_LIBRARIES})
+
+add_executable(static_matcher_wlsFilter src/static_matcher_with_wlsFilter.cpp)
+target_link_libraries (static_matcher_wlsFilter ${catkin_LIBRARIES})
+
+#add_executable(basic src/basic.cpp)
+#target_link_libraries (basic ${catkin_LIBRARIES})
+
+add_executable(depth_map src/depth_map.cpp)
+target_link_libraries (depth_map ${catkin_LIBRARIES})
